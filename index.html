@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f4ef" />
+    <meta name="description" content="在地图上探索 208 所美国大学，查看校区位置、校园照片、2027 U.S. News 与 QS 排名。" />
+    <title>Campus Atlas · 美国大学地图</title>
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell" id="app">
+      <aside class="sidebar" id="sidebar">
+        <header class="sidebar-header">
+          <div class="brand-row">
+            <div class="brand-icon" aria-hidden="true"><span>✦</span></div>
+            <div class="brand-name">CAMPUS <span>ATLAS</span></div>
+            <span class="edition-tag">2027</span>
+          </div>
+          <p class="eyebrow">EXPLORE U.S. UNIVERSITIES</p>
+          <h1>下一所大学，<br /><em>从地图开始。</em></h1>
+          <p class="intro">从综合排名前 100 延伸到更多计算机方向值得关注的学校。</p>
+          <div class="scope-note"><span class="scope-dot"></span><strong>208</strong> 所学校 <span class="scope-sep">·</span> 地图直观比较</div>
+        </header>
+
+        <section class="search-section" aria-label="搜索和筛选">
+          <label class="search-box" for="search-input">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="10.8" cy="10.8" r="6.7" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input id="search-input" type="search" placeholder="搜索中英文校名、城市或简称" autocomplete="off" />
+            <kbd>/</kbd>
+          </label>
+          <div class="filter-label">快速筛选</div>
+          <div class="rank-chips" role="group" aria-label="按排名筛选">
+            <button type="button" class="chip active" data-rank="all">全部</button>
+            <button type="button" class="chip" data-rank="25">前 25</button>
+            <button type="button" class="chip" data-rank="50">前 50</button>
+            <button type="button" class="chip" data-rank="100">前 100</button>
+          </div>
+          <div class="filter-row">
+            <label class="select-wrap"><span>学校类型</span><select id="type-filter"><option value="all">全部类型</option><option value="public">公立大学</option><option value="private">私立大学</option></select></label>
+            <label class="select-wrap"><span>所在州</span><select id="state-filter"><option value="all">全部地区</option></select></label>
+          </div>
+        </section>
+
+        <section class="results-section" aria-label="学校列表">
+          <div class="results-heading"><div><span class="results-kicker">UNIVERSITIES</span><h2>学校列表</h2></div><span id="result-count" class="result-count">208 所</span></div>
+          <div id="school-list" class="school-list"></div>
+          <p id="no-results" class="no-results" hidden>没有找到符合条件的学校。试试清空搜索或筛选。</p>
+        </section>
+        <footer class="sidebar-footer">排名：<a href="https://www.usnews.com/best-colleges/rankings/national-universities" target="_blank" rel="noopener noreferrer">U.S. News 2027</a> · <a href="https://www.topuniversities.com/qs-top-uni-wur" target="_blank" rel="noopener noreferrer">QS 2027</a><br />位置：IPEDS / College Scorecard · <a href="https://github.com/ryan-serpico/us-college-coordinates" target="_blank" rel="noopener noreferrer">数据说明</a></footer>
+      </aside>
+
+      <main class="map-area" aria-label="美国大学地图">
+        <div id="map"></div>
+        <div class="map-topbar"><div class="map-caption"><span class="caption-mark">✧</span><div><strong>探索地图</strong><small>拖动浏览 · 滚轮缩放 · 点击圆点查看学校</small></div></div><button id="reset-view" type="button" class="reset-view">⌖ <span>回到全美</span></button></div>
+        <div class="map-legend"><span><i class="legend-dot gold"></i>前 25</span><span><i class="legend-dot teal"></i>26–50</span><span><i class="legend-dot slate"></i>51–100</span><span><i class="legend-dot violet"></i>100 名后</span><span class="legend-explain">水滴数字：排名 · 圆形数字：学校数</span></div>
+        <article id="detail-card" class="detail-card" hidden aria-live="polite"></article>
+        <button id="mobile-toggle" class="mobile-toggle" type="button" aria-controls="sidebar" aria-expanded="true">收起学校列表 <span>⌄</span></button>
+      </main>
+    </div>
+  </body>
+</html>
