@@ -6,6 +6,14 @@ const stateNames = {
   SC: 'South Carolina', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VA: 'Virginia', VT: 'Vermont', WA: 'Washington', WI: 'Wisconsin', WV: 'West Virginia'
 };
 
+const countryNames = { US: 'United States', HK: 'Hong Kong', SG: 'Singapore', AU: 'Australia' };
+const regionViews = {
+  US: { center: [38.7, -96.5], zoom: 4, label: '回到全美' },
+  HK: { center: [22.35, 114.18], zoom: 11, label: '回到香港' },
+  SG: { center: [1.32, 103.78], zoom: 11, label: '回到新加坡' },
+  AU: { center: [-25.3, 133.8], zoom: 4, label: '回到澳洲' }
+};
+
 const wikiNames = {
   'ohio-state-university-columbus': 'Ohio State University',
   'university-of-washington': 'University of Washington',
@@ -21,7 +29,8 @@ const wikiNames = {
   'university-at-buffalo-suny': 'University at Buffalo',
   'university-of-tennessee-knoxville': 'University of Tennessee',
   'university-at-albany': 'University at Albany, SUNY',
-  'north-carolina-agricultural-and-technical-state-university': 'North Carolina A&T State University'
+  'north-carolina-agricultural-and-technical-state-university': 'North Carolina A&T State University',
+  'university-of-new-south-wales': 'University of New South Wales'
 };
 
 const searchInput = document.getElementById('search-input');
@@ -32,8 +41,11 @@ const countEl = document.getElementById('result-count');
 const detailEl = document.getElementById('detail-card');
 const noResultsEl = document.getElementById('no-results');
 const sidebarEl = document.getElementById('sidebar');
+const usFiltersEl = document.getElementById('us-filters');
+const legendEl = document.getElementById('map-legend');
 let schools = [];
 let rankLimit = Infinity;
+let currentCountry = 'US';
 let selectedId = null;
 let markers = new Map();
 const photoCache = new Map();
@@ -64,9 +76,19 @@ function rankColor(rank) {
   return rank <= 25 ? 'gold' : rank <= 50 ? 'teal' : rank <= 100 ? 'slate' : 'violet';
 }
 
+function schoolCountry(school) { return school.country || 'US'; }
+function schoolRank(school) { return schoolCountry(school) === 'US' ? school.rank : school.qsRank; }
+function schoolColor(school) { return schoolCountry(school) === 'US' ? rankColor(school.rank) : 'global'; }
+function schoolPlace(school) {
+  const country = schoolCountry(school);
+  if (country === 'US') return `${school.city}, ${stateNames[school.state] || school.state}`;
+  if (country === 'SG') return 'Singapore';
+  return `${school.city}, ${countryNames[country]}`;
+}
+
 function schoolSummary(school) {
   const kind = school.type === 'public' ? 'public' : 'private';
-  return `${school.name} is a ${kind} university in ${school.city}, ${stateNames[school.state] || school.state}. The map marker points to its main campus.`;
+  return `${school.name} is a ${kind} university in ${schoolPlace(school)}. The map marker points to its main campus.`;
 }
 
 function getFiltered() {
@@ -74,18 +96,19 @@ function getFiltered() {
   const kind = typeFilter.value;
   const region = stateFilter.value;
   return schools.filter(school =>
-    school.rank <= rankLimit &&
-    (kind === 'all' || school.type === kind) &&
-    (region === 'all' || school.state === region) &&
-    (!query || `${school.name} ${school.nameZh} ${school.aliases} ${school.city} ${school.state}`.toLowerCase().includes(query))
+    schoolCountry(school) === currentCountry &&
+    (currentCountry !== 'US' || school.rank <= rankLimit) &&
+    (currentCountry !== 'US' || kind === 'all' || school.type === kind) &&
+    (currentCountry !== 'US' || region === 'all' || school.state === region) &&
+    (!query || `${school.name} ${school.nameZh} ${school.aliases} ${school.city} ${school.state} ${countryNames[schoolCountry(school)]}`.toLowerCase().includes(query))
   );
 }
 
 function makeMarker(school) {
-  const color = rankColor(school.rank);
+  const color = schoolColor(school);
   const icon = L.divIcon({
     className: 'pin-wrap',
-    html: `<div class="school-pin ${color}${selectedId === school.id ? ' selected' : ''}" title="${escapeHtml(school.nameZh)} · ${escapeHtml(school.name)}"><span>${school.rank}</span></div>`,
+    html: `<div class="school-pin ${color}${selectedId === school.id ? ' selected' : ''}" title="${escapeHtml(school.nameZh)} · ${escapeHtml(school.name)}"><span>${schoolRank(school)}</span></div>`,
     iconSize: [34, 40],
     iconAnchor: [17, 37]
   });
@@ -100,8 +123,8 @@ function render() {
   noResultsEl.hidden = visible.length !== 0;
   listEl.innerHTML = visible.map(school => `
     <button class="school-row${school.id === selectedId ? ' selected' : ''}" type="button" data-id="${school.id}">
-      <span class="row-rank ${rankColor(school.rank)}">${school.rank}</span>
-      <span class="row-text"><strong>${escapeHtml(school.name)}</strong><span class="row-name-zh">${escapeHtml(school.nameZh)}</span><small>${escapeHtml(school.city)}, ${school.state} <span class="row-bullet">·</span> ${school.type === 'public' ? '公立' : '私立'}</small></span>
+      <span class="row-rank ${schoolColor(school)}">${schoolRank(school)}</span>
+      <span class="row-text"><strong>${escapeHtml(school.name)}</strong><span class="row-name-zh">${escapeHtml(school.nameZh)}</span><small>${escapeHtml(schoolPlace(school))} <span class="row-bullet">·</span> ${school.type === 'public' ? '公立' : '私立'}</small></span>
       <span class="row-arrow" aria-hidden="true">↗</span>
     </button>
   `).join('');
@@ -125,10 +148,10 @@ function detailHtml(school) {
     <button class="detail-close" type="button" aria-label="关闭学校信息">×</button>
     <div class="detail-image" id="detail-image"><div class="image-placeholder"><span>✦</span><small>CAMPUS PHOTO</small></div></div>
     <div class="detail-content">
-      <div class="detail-meta"><span class="detail-rank ${rankColor(school.rank)}">#${school.rank}</span><span>2027 U.S. NEWS</span><span class="meta-sep">·</span><span>${school.type === 'public' ? '公立大学' : '私立大学'}</span>${school.qsRank ? `<span class="detail-qs">QS 2027 #${escapeHtml(school.qsRank)}</span>` : ''}</div>
+      <div class="detail-meta"><span class="detail-rank ${schoolColor(school)}">#${schoolRank(school)}</span><span>${schoolCountry(school) === 'US' ? '2027 U.S. NEWS' : 'QS 2027'}</span><span class="meta-sep">·</span><span>${school.type === 'public' ? '公立大学' : '私立大学'}</span>${schoolCountry(school) === 'US' && school.qsRank ? `<span class="detail-qs">QS 2027 #${escapeHtml(school.qsRank)}</span>` : ''}</div>
       <h2>${escapeHtml(school.name)}</h2>
       <p class="detail-name-zh">${escapeHtml(school.nameZh)}</p>
-      <p class="detail-location">⌖ ${escapeHtml(school.city)}, ${escapeHtml(stateNames[school.state] || school.state)}</p>
+      <p class="detail-location">⌖ ${escapeHtml(schoolPlace(school))}</p>
       <p class="detail-description" id="detail-description">${escapeHtml(schoolSummary(school))}</p>
       <a id="wiki-source" class="wiki-source" hidden target="_blank" rel="noopener noreferrer">简介来源：Wikipedia ↗</a>
       <div class="detail-actions"><a class="primary-action" href="${escapeHtml(school.website)}" target="_blank" rel="noopener noreferrer">访问学校官网 <span>↗</span></a><a class="secondary-action" href="${mapUrl}" target="_blank" rel="noopener noreferrer" title="在 Google Maps 中查看路线">路线 <span>↗</span></a></div>
@@ -274,13 +297,31 @@ detailEl.addEventListener('click', event => {
 searchInput.addEventListener('input', render);
 typeFilter.addEventListener('change', render);
 stateFilter.addEventListener('change', render);
+document.querySelectorAll('[data-country]').forEach(button => button.addEventListener('click', () => {
+  currentCountry = button.dataset.country;
+  searchInput.value = '';
+  selectedId = null;
+  detailEl.hidden = true;
+  document.querySelectorAll('[data-country]').forEach(chip => chip.classList.toggle('active', chip === button));
+  usFiltersEl.hidden = currentCountry !== 'US';
+  legendEl.innerHTML = currentCountry === 'US'
+    ? '<span><i class="legend-dot gold"></i>前 25</span><span><i class="legend-dot teal"></i>26–50</span><span><i class="legend-dot slate"></i>51–100</span><span><i class="legend-dot violet"></i>100 名后</span><span class="legend-explain">水滴数字：U.S. News 排名 · 圆形数字：学校数</span>'
+    : '<span><i class="legend-dot global"></i>QS 2027 综合排名</span><span class="legend-explain">水滴数字：QS 排名 · 圆形数字：学校数</span>';
+  const view = regionViews[currentCountry];
+  document.querySelector('#reset-view span').textContent = view.label;
+  map.flyTo(view.center, view.zoom);
+  render();
+}));
 document.querySelectorAll('[data-rank]').forEach(button => button.addEventListener('click', () => {
   rankLimit = button.dataset.rank === 'all' ? Infinity : Number(button.dataset.rank);
   document.querySelectorAll('[data-rank]').forEach(chip => chip.classList.toggle('active', chip === button));
   render();
 }));
 
-document.getElementById('reset-view').addEventListener('click', () => map.flyTo([38.7, -96.5], 4));
+document.getElementById('reset-view').addEventListener('click', () => {
+  const view = regionViews[currentCountry];
+  map.flyTo(view.center, view.zoom);
+});
 document.getElementById('mobile-toggle').addEventListener('click', event => {
   const collapsed = sidebarEl.classList.toggle('collapsed');
   event.currentTarget.setAttribute('aria-expanded', String(!collapsed));
@@ -301,7 +342,7 @@ document.addEventListener('keydown', event => {
 
 fetch('./schools.json').then(response => response.json()).then(data => {
   schools = data;
-  for (const state of [...new Set(schools.map(school => school.state))].sort()) {
+  for (const state of [...new Set(schools.filter(school => schoolCountry(school) === 'US').map(school => school.state))].sort()) {
     const option = document.createElement('option');
     option.value = state;
     option.textContent = `${stateNames[state] || state} · ${state}`;
