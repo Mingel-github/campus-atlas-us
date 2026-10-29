@@ -6,12 +6,13 @@ const stateNames = {
   SC: 'South Carolina', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VA: 'Virginia', VT: 'Vermont', WA: 'Washington', WI: 'Wisconsin', WV: 'West Virginia'
 };
 
-const countryNames = { US: 'United States', HK: 'Hong Kong', SG: 'Singapore', AU: 'Australia' };
+const countryNames = { US: 'United States', HK: 'Hong Kong', SG: 'Singapore', AU: 'Australia', GB: 'United Kingdom' };
 const regionViews = {
   US: { center: [38.7, -96.5], zoom: 4, label: '回到全美' },
   HK: { center: [22.35, 114.18], zoom: 11, label: '回到香港' },
   SG: { center: [1.32, 103.78], zoom: 11, label: '回到新加坡' },
-  AU: { center: [-25.3, 133.8], zoom: 4, label: '回到澳洲' }
+  AU: { center: [-25.3, 133.8], zoom: 4, label: '回到澳洲' },
+  GB: { center: [53.7, -2.1], zoom: 6, label: '回到英国' }
 };
 
 const wikiNames = {
@@ -30,7 +31,8 @@ const wikiNames = {
   'university-of-tennessee-knoxville': 'University of Tennessee',
   'university-at-albany': 'University at Albany, SUNY',
   'north-carolina-agricultural-and-technical-state-university': 'North Carolina A&T State University',
-  'university-of-new-south-wales': 'University of New South Wales'
+  'university-of-new-south-wales': 'University of New South Wales',
+  'university-college-london': 'University College London'
 };
 
 const searchInput = document.getElementById('search-input');

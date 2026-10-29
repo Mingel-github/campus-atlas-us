@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f6f4ef" />
-    <meta name="description" content="在地图上探索美国、香港、新加坡和澳洲的大学，查看校区位置、校园照片及 2027 U.S. News 与 QS 排名。" />
+    <meta name="description" content="在地图上探索美国、英国、香港、新加坡和澳洲的大学，查看校区位置、校园照片及 2027 U.S. News 与 QS 排名。" />
     <title>Campus Atlas · 大学地图</title>
     <link rel="preconnect" href="https://tile.openstreetmap.org" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -25,8 +25,8 @@
           </div>
           <p class="eyebrow">EXPLORE UNIVERSITIES</p>
           <h1>下一所大学，<br /><em>从地图开始。</em></h1>
-          <p class="intro">以美国为主，顺路看看香港、新加坡和澳洲值得关注的学校。</p>
-          <div class="scope-note"><span class="scope-dot"></span><strong>221</strong> 所学校 <span class="scope-sep">·</span> 地图直观比较</div>
+          <p class="intro">以美国为主，顺路看看英国、香港、新加坡和澳洲值得关注的学校。</p>
+          <div class="scope-note"><span class="scope-dot"></span><strong>228</strong> 所学校 <span class="scope-sep">·</span> 地图直观比较</div>
         </header>
 
         <section class="search-section" aria-label="搜索和筛选">
@@ -41,6 +41,7 @@
             <button type="button" class="region-chip" data-country="HK">香港 <span>5</span></button>
             <button type="button" class="region-chip" data-country="SG">新加坡 <span>2</span></button>
             <button type="button" class="region-chip" data-country="AU">澳洲 <span>6</span></button>
+            <button type="button" class="region-chip" data-country="GB">英国 <span>7</span></button>
           </div>
           <div id="us-filters">
             <div class="filter-label us-rank-label">U.S. News 综合排名</div>
@@ -62,7 +63,7 @@
           <div id="school-list" class="school-list"></div>
           <p id="no-results" class="no-results" hidden>没有找到符合条件的学校。试试清空搜索或筛选。</p>
         </section>
-        <footer class="sidebar-footer">美国：<a href="https://www.usnews.com/best-colleges/rankings/national-universities" target="_blank" rel="noopener noreferrer">U.S. News 2027</a> · 港新澳：<a href="https://www.topuniversities.com/qs-top-uni-wur" target="_blank" rel="noopener noreferrer">QS 2027</a><br />位置：IPEDS / College Scorecard、OpenStreetMap · <a href="https://github.com/ryan-serpico/us-college-coordinates" target="_blank" rel="noopener noreferrer">数据说明</a></footer>
+        <footer class="sidebar-footer">美国：<a href="https://www.usnews.com/best-colleges/rankings/national-universities" target="_blank" rel="noopener noreferrer">U.S. News 2027</a> · 其他地区：<a href="https://www.topuniversities.com/qs-top-uni-wur" target="_blank" rel="noopener noreferrer">QS 2027</a><br />位置：IPEDS / College Scorecard、OpenStreetMap · <a href="https://github.com/ryan-serpico/us-college-coordinates" target="_blank" rel="noopener noreferrer">数据说明</a></footer>
       </aside>
 
       <main class="map-area" aria-label="大学地图">
