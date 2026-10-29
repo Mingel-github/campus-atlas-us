@@ -1,5 +1,7 @@
 # Campus Atlas
 
+[在线打开地图](https://mingel-github.github.io/campus-atlas-us/)
+
 一个静态网页：在二维地图上浏览 208 所美国大学。原有 2027 U.S. News National Universities 前 100 名次的 108 所大学保留，另加入 100 所供计算机方向比较的学校。支持中英文校名搜索、排名与办学类型筛选、点位聚合、校园照片、学校卡片、官网和地图路线链接。地图数字和筛选始终使用 U.S. News 综合排名；QS 世界排名仅在查得到时显示于卡片中。
 
 ## 本地运行
