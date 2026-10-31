@@ -1298,5 +1298,10 @@
     "lon": -81.509144,
     "website": "https://www.unf.edu/",
     "unitid": "136172"
-  }
+  },
+  {"id":"angelo-state-university","rank":null,"rankLabel":"382–422","markerLabel":"382+","name":"Angelo State University","aliases":"ASU","state":"TX","city":"San Angelo","type":"public","lat":31.4389278,"lon":-100.4553039,"website":"https://www.angelo.edu/"},
+  {"id":"southern-arkansas-university","rank":null,"rankLabel":"R104","rankCategory":"Regional South","name":"Southern Arkansas University","aliases":"SAU","state":"AR","city":"Magnolia","type":"public","lat":33.2898495,"lon":-93.2360008,"website":"https://web.saumag.edu/"},
+  {"id":"southern-illinois-university-carbondale","rank":288,"name":"Southern Illinois University Carbondale","aliases":"SIU SIUC","state":"IL","city":"Carbondale","type":"public","lat":37.7083423,"lon":-89.2275556,"website":"https://siu.edu/"},
+  {"id":"texas-a-and-m-university-san-antonio","rank":null,"rankLabel":"R56","rankCategory":"Regional West","name":"Texas A&M University–San Antonio","aliases":"TAMUSA A&M San Antonio","state":"TX","city":"San Antonio","type":"public","lat":29.3030308,"lon":-98.5267582,"website":"https://www.tamusa.edu/"},
+  {"id":"new-mexico-institute-of-mining-and-technology","rank":null,"rankLabel":"R10","rankCategory":"Regional West","name":"New Mexico Institute of Mining and Technology","aliases":"New Mexico Tech NMT","state":"NM","city":"Socorro","type":"public","lat":34.0673,"lon":-106.9055,"website":"https://www.nmt.edu/"}
 ]

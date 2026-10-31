@@ -75,11 +75,11 @@ function escapeHtml(value) {
 }
 
 function rankColor(rank) {
-  return rank <= 25 ? 'gold' : rank <= 50 ? 'teal' : rank <= 100 ? 'slate' : 'violet';
+  return !Number.isFinite(rank) ? 'violet' : rank <= 25 ? 'gold' : rank <= 50 ? 'teal' : rank <= 100 ? 'slate' : 'violet';
 }
 
 function schoolCountry(school) { return school.country || 'US'; }
-function schoolRank(school) { return schoolCountry(school) === 'US' ? school.rank : school.qsRank; }
+function schoolRank(school) { return schoolCountry(school) === 'US' ? (school.rankLabel || school.rank) : school.qsRank; }
 function schoolColor(school) { return schoolCountry(school) === 'US' ? rankColor(school.rank) : 'global'; }
 function schoolPlace(school) {
   const country = schoolCountry(school);
@@ -99,7 +99,7 @@ function getFiltered() {
   const region = stateFilter.value;
   return schools.filter(school =>
     schoolCountry(school) === currentCountry &&
-    (currentCountry !== 'US' || school.rank <= rankLimit) &&
+    (currentCountry !== 'US' || rankLimit === Infinity || (Number.isFinite(school.rank) && school.rank <= rankLimit)) &&
     (currentCountry !== 'US' || kind === 'all' || school.type === kind) &&
     (currentCountry !== 'US' || region === 'all' || school.state === region) &&
     (!query || `${school.name} ${school.nameZh} ${school.aliases} ${school.city} ${school.state} ${countryNames[schoolCountry(school)]}`.toLowerCase().includes(query))
@@ -110,7 +110,7 @@ function makeMarker(school) {
   const color = schoolColor(school);
   const icon = L.divIcon({
     className: 'pin-wrap',
-    html: `<div class="school-pin ${color}${selectedId === school.id ? ' selected' : ''}" title="${escapeHtml(school.nameZh)} · ${escapeHtml(school.name)}"><span>${schoolRank(school)}</span></div>`,
+    html: `<div class="school-pin ${color}${selectedId === school.id ? ' selected' : ''}" title="${escapeHtml(school.nameZh)} · ${escapeHtml(school.name)}"><span>${school.markerLabel || schoolRank(school)}</span></div>`,
     iconSize: [34, 40],
     iconAnchor: [17, 37]
   });
@@ -125,7 +125,7 @@ function render() {
   noResultsEl.hidden = visible.length !== 0;
   listEl.innerHTML = visible.map(school => `
     <button class="school-row${school.id === selectedId ? ' selected' : ''}" type="button" data-id="${school.id}">
-      <span class="row-rank ${schoolColor(school)}">${schoolRank(school)}</span>
+      <span class="row-rank ${schoolColor(school)}">${school.markerLabel || schoolRank(school)}</span>
       <span class="row-text"><strong>${escapeHtml(school.name)}</strong><span class="row-name-zh">${escapeHtml(school.nameZh)}</span><small>${escapeHtml(schoolPlace(school))} <span class="row-bullet">·</span> ${school.type === 'public' ? '公立' : '私立'}</small></span>
       <span class="row-arrow" aria-hidden="true">↗</span>
     </button>
@@ -150,7 +150,7 @@ function detailHtml(school) {
     <button class="detail-close" type="button" aria-label="关闭学校信息">×</button>
     <div class="detail-image" id="detail-image"><div class="image-placeholder"><span>✦</span><small>CAMPUS PHOTO</small></div></div>
     <div class="detail-content">
-      <div class="detail-meta"><span class="detail-rank ${schoolColor(school)}">#${schoolRank(school)}</span><span>${schoolCountry(school) === 'US' ? '2027 U.S. NEWS' : 'QS 2027'}</span><span class="meta-sep">·</span><span>${school.type === 'public' ? '公立大学' : '私立大学'}</span>${schoolCountry(school) === 'US' && school.qsRank ? `<span class="detail-qs">QS 2027 #${escapeHtml(school.qsRank)}</span>` : ''}</div>
+      <div class="detail-meta"><span class="detail-rank ${schoolColor(school)}">${school.rankCategory ? '' : '#'}${schoolRank(school)}</span><span>${schoolCountry(school) === 'US' ? `2027 U.S. NEWS${school.rankCategory ? ` · ${escapeHtml(school.rankCategory.toUpperCase())}` : ''}` : 'QS 2027'}</span><span class="meta-sep">·</span><span>${school.type === 'public' ? '公立大学' : '私立大学'}</span>${schoolCountry(school) === 'US' && school.qsRank ? `<span class="detail-qs">QS 2027 #${escapeHtml(school.qsRank)}</span>` : ''}</div>
       <h2>${escapeHtml(school.name)}</h2>
       <p class="detail-name-zh">${escapeHtml(school.nameZh)}</p>
       <p class="detail-location">⌖ ${escapeHtml(schoolPlace(school))}</p>
@@ -307,7 +307,7 @@ document.querySelectorAll('[data-country]').forEach(button => button.addEventLis
   document.querySelectorAll('[data-country]').forEach(chip => chip.classList.toggle('active', chip === button));
   usFiltersEl.hidden = currentCountry !== 'US';
   legendEl.innerHTML = currentCountry === 'US'
-    ? '<span><i class="legend-dot gold"></i>前 25</span><span><i class="legend-dot teal"></i>26–50</span><span><i class="legend-dot slate"></i>51–100</span><span><i class="legend-dot violet"></i>100 名后</span><span class="legend-explain">水滴数字：U.S. News 排名 · 圆形数字：学校数</span>'
+    ? '<span><i class="legend-dot gold"></i>前 25</span><span><i class="legend-dot teal"></i>26–50</span><span><i class="legend-dot slate"></i>51–100</span><span><i class="legend-dot violet"></i>100 名后</span><span class="legend-explain">水滴：U.S. News 排名（R 为区域榜） · 圆形：学校数</span>'
     : '<span><i class="legend-dot global"></i>QS 2027 综合排名</span><span class="legend-explain">水滴数字：QS 排名 · 圆形数字：学校数</span>';
   const view = regionViews[currentCountry];
   document.querySelector('#reset-view span').textContent = view.label;

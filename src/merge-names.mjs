@@ -2,9 +2,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const current = JSON.parse(readFileSync(new URL('../schools.json', import.meta.url), 'utf8'));
 const additions = JSON.parse(readFileSync(new URL('./additions.json', import.meta.url), 'utf8'));
-const usSchools = [...current.filter(school => (school.country || 'US') === 'US' && school.rank <= 100), ...additions]
-  .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));
-const international = JSON.parse(readFileSync(new URL('./international.json', import.meta.url), 'utf8'));
+const usSchools = [...current.filter(school => (school.country || 'US') === 'US' && Number.isFinite(school.rank) && school.rank <= 100), ...additions]
+  .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.name.localeCompare(b.name));
+const international = JSON.parse(readFileSync(new URL('./international.json', import.meta.url), 'utf8'))
+  .sort((a, b) => a.country.localeCompare(b.country) || Number(a.qsRank) - Number(b.qsRank));
 const schools = [...usSchools, ...international];
 const names = {
   ...JSON.parse(readFileSync(new URL('./names-zh.json', import.meta.url), 'utf8')),
